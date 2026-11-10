@@ -1,0 +1,20 @@
+# Rust
+backend/target/
+**/*.rs.bk
+
+# Node
+frontend/node_modules/
+frontend/.next/
+frontend/out/
+frontend/build/
+
+#Environment & Secrets
+.env
+.env.local
+.env.production
+*.pem
+
+# OS & Editor
+.Ds_Store
+.vscode/
+.idea/
