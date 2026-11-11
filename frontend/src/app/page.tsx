@@ -13,7 +13,7 @@ export default function Home() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetch("http://192.168.114.135:3001/api/demos")
+    fetch("/api/demos")
       .then((res) => res.json())
       .then((data) => {
         setDemos(data);
