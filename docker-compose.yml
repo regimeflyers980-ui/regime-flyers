@@ -1,4 +1,19 @@
 services:
+  db:
+    image: postgres:15-alpine
+    environment:
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: regimeflyers_secure_password
+      POSTGRES_DB: regime_flyers
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U admin -d regime_flyers"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
   backend:
     build:
       context: ./backend
@@ -7,7 +22,19 @@ services:
       - "3001"
     environment:
       - RUST_LOG=info
+      - DATABASE_URL=postgres://admin:regimeflyers_secure_password@db:5432/regime_flyers
+    depends_on:
+      db:
+        condition: service_healthy # <--- THIS IS THE MAGIC LINE
+    #  --- ADD THESE LINES TO FIX THE 10-SECOND DELAY ---
+    sysctls:
+      net.ipv6.conf.all.disable_ipv6: 1
+    dns:
+      - 8.8.8.8
+      - 1.1.1.1
     restart: unless-stopped
+
+# ... (leave the frontend, nginx, and volumes sections exactly as they are)
 
   frontend:
     build:
@@ -29,3 +56,6 @@ services:
       - backend
       - frontend
     restart: unless-stopped
+
+volumes:
+  pgdata:
