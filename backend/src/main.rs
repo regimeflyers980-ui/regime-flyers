@@ -8,26 +8,91 @@ use tower_http::cors::{Any, CorsLayer};
 use tower_http::trace::TraceLayer;
 
 #[derive(Serialize)]
-struct DemoResponse {
+struct DemoSystem {
+    id: u32,
     system: String,
     status: String,
     demo_url: String,
 }
 
-async fn list_demos() -> Json<Vec<DemoResponse>> {
+#[derive(Serialize)]
+struct MeterReading {
+    reading_date: String,
+    previous_units: i32,
+    current_units: i32,
+    units_used: i32,
+    source: String,
+}
+
+#[derive(Serialize)]
+struct TenantDashboard {
+    full_name: String,
+    house_number: String,
+    floor_no: i32,
+    meter_number: String,
+    recent_readings: Vec<MeterReading>,
+}
+
+#[derive(Serialize)]
+struct AdminDashboard {
+    total_houses: u32,
+    active_tenants: u32,
+    total_units_billed: i32,
+    recent_scans: Vec<String>,
+}
+
+async fn list_demos() -> Json<Vec<DemoSystem>> {
     let demos = vec![
-        DemoResponse {
-            system: "Inventory Management".into(),
+        DemoSystem {
+            id: 1,
+            system: "Water Management".into(),
             status: "active".into(),
-            demo_url: "/demos/inventory".into(),
+            demo_url: "/demo/water".into(),
         },
-        DemoResponse {
-            system: "Client Portal".into(),
+        DemoSystem {
+            id: 2,
+            system: "Inventory Management".into(),
             status: "beta".into(),
-            demo_url: "/demos/client-portal".into(),
+            demo_url: "/demo/inventory".into(),
         },
     ];
     Json(demos)
+}
+
+async fn get_water_tenant() -> Json<TenantDashboard> {
+    let dashboard = TenantDashboard {
+        full_name: "John Doe".into(),
+        house_number: "A-12".into(),
+        floor_no: 2,
+        meter_number: "WM-99821".into(),
+        recent_readings: vec![
+            MeterReading {
+                reading_date: "2026-10-01".into(),
+                previous_units: 120,
+                current_units: 145,
+                units_used: 25,
+                source: "OCR_SCAN".into(),
+            },
+            MeterReading {
+                reading_date: "2026-09-01".into(),
+                previous_units: 100,
+                current_units: 120,
+                units_used: 20,
+                source: "MANUAL".into(),
+            },
+        ],
+    };
+    Json(dashboard)
+}
+
+async fn get_water_admin() -> Json<AdminDashboard> {
+    let dashboard = AdminDashboard {
+        total_houses: 15,
+        active_tenants: 42,
+        total_units_billed: 3450,
+        recent_scans: vec!["WM-99821 (John Doe)".into(), "WM-99822 (Jane Smith)".into()],
+    };
+    Json(dashboard)
 }
 
 async fn health() -> &'static str {
@@ -38,7 +103,6 @@ async fn health() -> &'static str {
 async fn main() {
     tracing_subscriber::fmt::init();
 
-    // For development, we allow all origins. We will lock this down for production later.
     let cors = CorsLayer::new()
         .allow_origin(Any)
         .allow_methods(Any)
@@ -47,6 +111,8 @@ async fn main() {
     let app = Router::new()
         .route("/api/health", get(health))
         .route("/api/demos", get(list_demos))
+        .route("/api/water/tenant", get(get_water_tenant))
+        .route("/api/water/admin", get(get_water_admin))
         .layer(cors)
         .layer(TraceLayer::new_for_http());
 

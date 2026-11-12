@@ -80,9 +80,9 @@ export default function Home() {
               
               {/* Gradient Button */}
               <button
-                onClick={() => window.open(demo.demo_url, "_blank")}
-                className="mt-8 w-full inline-flex justify-center items-center rounded-lg bg-gradient-to-r from-[#4682B4] to-[#8A2BE2] px-5 py-3 text-sm font-semibold text-white shadow-md hover:from-[#3b729e] hover:to-[#7a26c7] focus:outline-none focus:ring-2 focus:ring-[#8A2BE2] focus:ring-offset-2 transition-all"
-              >
+		onClick={() => window.location.href = demo.demo_url}
+		className="mt-8 w-full inline-flex justify-center items-center rounded-lg bg-gradient-to-r from-[#4682B4] to-[#8A2BE2] px-5 py-3 text-sm font-semibold text-white shadow-md hover:from-[#3b729e] hover:to-[#7a26c7] focus:outline-none focus:ring-2 focus:ring-[#8A2BE2] focus:ring-offset-2 transition-all"
+		>
                 Access Demo
                 <svg className="ml-2 -mr-1 h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
