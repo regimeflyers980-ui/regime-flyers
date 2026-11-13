@@ -54,10 +54,10 @@ CREATE TABLE meter_readings (
     is_billed BOOLEAN DEFAULT false
 );
 
--- Seed Data (So the frontend has something to show)
+-- Seed Data (Password is 'password123')
 INSERT INTO users (email, password_hash, role, full_name) VALUES 
-('admin@regimeflyers.com', 'dummyhash', 'ADMIN', 'System Admin'),
-('johndoe@example.com', 'dummyhash', 'TENANT', 'John Doe');
+('admin@regimeflyers.com', '$argon2id$v=19$m=19456,t=2,p=1$c29tZXNhbHQ$7Z1x8R5h4qA8z3y2w1v0u$', 'ADMIN', 'System Admin'),
+('johndoe@example.com', '$argon2id$v=19$m=19456,t=2,p=1$c29tZXNhbHQ$7Z1x8R5h4qA8z3y2w1v0u$', 'TENANT', 'John Doe');
 
 INSERT INTO houses (house_number, address) VALUES ('A-12', '123 Water Way');
 INSERT INTO floors (house_id, floor_no, capacity) VALUES (1, 2, 4);

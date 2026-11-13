@@ -154,7 +154,9 @@ export default function WaterDemo() {
                 <p className="font-semibold text-slate-800">{tenantData.meter_number}</p>
               </div>
             </div>
-
+            <Link href="/demo/water/admin" className="mb-6 inline-block bg-[#4682B4] text-white px-4 py-2 rounded-lg font-semibold hover:bg-[#3b729e] transition">
+            + Add New Reading
+            </Link>
             <h3 className="font-semibold text-slate-800 mb-4">Usage History</h3>
             <div className="overflow-x-auto">
               <table className="w-full text-sm text-left">
