@@ -1,0 +1,9 @@
+# Rust build artifacts
+system/target/
+**/*.rs.bk
+
+# Environment variables
+system/.env
+
+# OS files
+.DS_Store
