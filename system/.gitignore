@@ -7,3 +7,6 @@ system/.env
 
 # OS files
 .DS_Store
+
+system/target/
+system/.env
