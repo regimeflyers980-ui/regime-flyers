@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Admin Dashboard - Regime Flyers</title>
+    <style>
+        body { font-family: sans-serif; background: #f4f4f5; margin: 0; padding: 2rem; }
+        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; }
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; }
+        .card { background: white; padding: 1.5rem; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        input, select { width: 100%; padding: 0.5rem; margin-bottom: 1rem; box-sizing: border-box; }
+        button { padding: 0.75rem 1.5rem; background: #2563eb; color: white; border: none; border-radius: 4px; cursor: pointer; width: 100%; }
+        table { width: 100%; border-collapse: collapse; margin-top: 1rem; font-size: 0.9rem; }
+        th, td { text-align: left; padding: 0.5rem; border-bottom: 1px solid #ddd; }
+        h2 { border-bottom: 2px solid #eee; padding-bottom: 0.5rem; }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>Admin Dashboard</h1>
+        <form method="post" action="/logout">
+            <button style="background: #dc2626; width: auto;">Logout</button>
+        </form>
+    </div>
+
+    <div class="grid">
+        <!-- Column 1: Properties & Meters -->
+        <div>
+            <div class="card" style="margin-bottom: 2rem;">
+                <h2>Add House</h2>
+                <form method="post" action="/admin/houses">
+                    <input type="text" name="house_number" placeholder="House Number (e.g. A1)" required>
+                    <input type="text" name="address" placeholder="Address" required>
+                    <button type="submit">Add House</button>
+                </form>
+                <table>
+                    <tr><th>House #</th><th>Address</th></tr>
+                    {% for house in houses %}
+                    <tr><td>{{ house.house_number }}</td><td>{{ house.address.as_deref().unwrap_or("-") }}</td></tr>
+                    {% endfor %}
+                </table>
+            </div>
+
+            <div class="card">
+                <h2>Register Water Meter</h2>
+                <form method="post" action="/admin/meters">
+                    <select name="tenant_id" required>
+                        <option value="">Select Tenant...</option>
+                        {% for tenant in tenants %}
+                        <option value="{{ tenant.id }}">{{ tenant.full_name }}</option>
+                        {% endfor %}
+                    </select>
+                    <input type="text" name="meter_number" placeholder="Meter Serial Number" required>
+                    <button type="submit">Register Meter</button>
+                </form>
+                <table>
+                    <tr><th>Meter Serial</th><th>Assigned Tenant</th></tr>
+                    {% for meter in meters %}
+                    <tr>
+                        <td>{{ meter.meter_number }}</td>
+                        <td>{{ meter.tenant_name.as_deref().unwrap_or("-") }}</td>
+                    </tr>
+                    {% endfor %}
+                </table>
+            </div>
+        </div>
+
+        <!-- Column 2: Floors & Tenants -->
+        <div>
+            <div class="card" style="margin-bottom: 2rem;">
+                <h2>Add Floor</h2>
+                <form method="post" action="/admin/floors">
+                    <select name="house_id" required>
+                        <option value="">Select House...</option>
+                        {% for house in houses %}
+                        <option value="{{ house.id }}">{{ house.house_number }}</option>
+                        {% endfor %}
+                    </select>
+                    <input type="number" name="floor_no" placeholder="Floor Number" required>
+                    <input type="number" name="capacity" placeholder="Tenant Capacity" required>
+                    <button type="submit">Add Floor</button>
+                </form>
+            </div>
+
+            <div class="card">
+                <h2>Register Tenant</h2>
+                <form method="post" action="/admin/tenants">
+                    <select name="floor_id" required>
+                        <option value="">Select Floor...</option>
+                        {% for floor in floor_options %}
+                        <option value="{{ floor.id }}">House {{ floor.house_number }} - Floor {{ floor.floor_no }}</option>
+                        {% endfor %}
+                    </select>
+                    <input type="text" name="full_name" placeholder="Full Name" required>
+                    <input type="text" name="phone" placeholder="Phone Number" required>
+                    <button type="submit">Add Tenant</button>
+                </form>
+                <table>
+                    <tr><th>Tenant Name</th><th>Floor ID</th><th>Phone</th></tr>
+                    {% for tenant in tenants %}
+                    <tr>
+                        <td>{{ tenant.full_name }}</td>
+                        <td>{{ tenant.floor_id }}</td>
+                        <td>{{ tenant.phone.as_deref().unwrap_or("-") }}</td>
+                    </tr>
+                    {% endfor %}
+                </table>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

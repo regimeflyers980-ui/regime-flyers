@@ -2,23 +2,17 @@
 name = "regime_flyers"
 version = "0.1.0"
 edition = "2021"
+default-run = "regime_flyers"
 
 [dependencies]
-# Web Framework & Async
 axum = { version = "0.7", features = ["macros", "multipart"] }
 tokio = { version = "1", features = ["full"] }
 tower = "0.5"
 tower-http = { version = "0.6", features = ["fs", "trace"] }
-tower-sessions = "0.13"
+tower-sessions = { version = "0.13", features = ["memory-store"] }
+time = "0.3"
 
-# Database
-sqlx = { version = "0.8", features = [
-    "runtime-tokio-rustls", 
-    "postgres", 
-    "uuid", 
-    "chrono", 
-    "migrate"
-] }
+sqlx = { version = "0.8", features = ["runtime-tokio-rustls", "postgres", "uuid", "chrono", "migrate"] }
 
 # Templating & Serialization
 askama = "0.12"

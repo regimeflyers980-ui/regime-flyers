@@ -1,34 +1,48 @@
+mod auth;
+mod handlers;
 mod models;
 
-use axum::{routing::get, Router};
+use axum::{
+    routing::{get, post},
+    Router,
+};
 use sqlx::PgPool;
 use std::net::SocketAddr;
 use tower_http::trace::TraceLayer;
+use tower_sessions::{Expiry, MemoryStore, SessionManagerLayer};
 
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
-    // 1. Load Environment Variables
     dotenvy::dotenv().ok();
     tracing_subscriber::fmt()
         .with_env_filter(tracing_subscriber::EnvFilter::from_default_env())
         .init();
 
-    // 2. Connect to Database
-    let database_url = std::env::var("DATABASE_URL")
-        .expect("DATABASE_URL must be set in .env");
+    let database_url = std::env::var("DATABASE_URL").expect("DATABASE_URL must be set");
     let pool = PgPool::connect(&database_url).await?;
 
-    // 3. Run Database Migrations
     tracing::info!("Running database migrations...");
     sqlx::migrate!("./migrations").run(&pool).await?;
 
-    // 4. Build Router
+    let session_store = MemoryStore::default();
+    let session_layer = SessionManagerLayer::new(session_store)
+        .with_secure(false)
+        .with_expiry(Expiry::OnInactivity(time::Duration::days(7)));
+
     let app = Router::new()
-        .route("/", get(root))
+        .route("/", get(|| async { "Regime Flyers System is Online!" }))
+        .route("/login", get(handlers::auth::login_form).post(handlers::auth::login))
+        .route("/logout", post(handlers::auth::logout))
+        // Admin Routes
+        .route("/admin", get(handlers::admin::dashboard))
+        .route("/admin/houses", post(handlers::admin::add_house))
+        .route("/admin/floors", post(handlers::admin::add_floor))
+        .route("/admin/tenants", post(handlers::admin::add_tenant))
+        .route("/admin/meters", post(handlers::admin::add_meter))
+        .layer(session_layer)
         .layer(TraceLayer::new_for_http())
         .with_state(pool);
 
-    // 5. Start Server
     let addr_str = std::env::var("BIND_ADDR").unwrap_or_else(|_| "127.0.0.1:3000".into());
     let addr: SocketAddr = addr_str.parse()?;
     tracing::info!("🚀 Server listening on {}", addr);
@@ -37,9 +51,4 @@ async fn main() -> anyhow::Result<()> {
     axum::serve(listener, app).await?;
 
     Ok(())
-}
-
-// Basic health check route
-async fn root() -> &'static str {
-    "Regime Flyers System is Online!"
 }
