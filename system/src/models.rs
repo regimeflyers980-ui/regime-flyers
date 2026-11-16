@@ -76,3 +76,15 @@ pub struct MeterForm {
     pub tenant_id: Uuid,
     pub meter_number: String,
 }
+
+// Represents a single row in the Master table
+#[derive(FromRow, Serialize)]
+pub struct FullPropertyView {
+    pub house_number: String,
+    pub address: Option<String>,
+    pub floor_no: Option<i32>,
+    pub capacity: Option<i32>,
+    pub tenant_name: Option<String>,
+    pub phone: Option<String>,
+    pub meter_number: Option<String>,
+}

@@ -45,12 +45,18 @@ export default function WaterDemo() {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    const fetchData = async () => {
+        const fetchData = async () => {
       try {
         const [tenantRes, adminRes] = await Promise.all([
           fetch("/api/water/tenant"),
           fetch("/api/water/admin")
         ]);
+
+        // NEW: If unauthorized, redirect to login
+        if (tenantRes.status === 401 || adminRes.status === 401) {
+          window.location.href = "/login";
+          return;
+        }
 
         if (!tenantRes.ok || !adminRes.ok) {
           throw new Error("Failed to fetch data from server. Is the backend running?");
@@ -59,7 +65,6 @@ export default function WaterDemo() {
         const tenant = await tenantRes.json();
         const admin = await adminRes.json();
         
-        // Ensure recent_readings is an array before setting state
         setTenantData({
           ...tenant,
           recent_readings: Array.isArray(tenant.recent_readings) ? tenant.recent_readings : []
@@ -72,7 +77,7 @@ export default function WaterDemo() {
       }
     };
 
-    fetchData();
+
   }, []);
 
   if (loading) {

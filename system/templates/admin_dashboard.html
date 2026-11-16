@@ -3,27 +3,104 @@
 <head>
     <title>Admin Dashboard - Regime Flyers</title>
     <style>
-        body { font-family: sans-serif; background: #f4f4f5; margin: 0; padding: 2rem; }
+        /* Regime Flyers Design System */
+        :root {
+            --primary-blue: #043cbc;
+            --accent-cyan: #14d2fa;
+            --bg-light-blue: #d0ecfc;
+            --bg-white: #ffffff;
+            --text-dark: #1f2937;
+            --blue-violet: #5b21b6; 
+            --accent-green: #10b981;
+        }
+
+        body { 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+            background-color: var(--bg-light-blue); 
+            color: var(--text-dark);
+            margin: 0; 
+            padding: 2rem; 
+        }
+
+        /* Typography */
+        h1, h2, h3 { color: var(--primary-blue); margin-top: 0; }
+        h1 { font-size: 2rem; font-weight: 700; }
+        h2 { font-size: 1.25rem; border-bottom: 2px solid var(--bg-light-blue); padding-bottom: 0.5rem; margin-bottom: 1rem;}
+
+        /* Layout */
         .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; }
-        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; }
-        .card { background: white; padding: 1.5rem; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
-        input, select { width: 100%; padding: 0.5rem; margin-bottom: 1rem; box-sizing: border-box; }
-        button { padding: 0.75rem 1.5rem; background: #2563eb; color: white; border: none; border-radius: 4px; cursor: pointer; width: 100%; }
-        table { width: 100%; border-collapse: collapse; margin-top: 1rem; font-size: 0.9rem; }
-        th, td { text-align: left; padding: 0.5rem; border-bottom: 1px solid #ddd; }
-        h2 { border-bottom: 2px solid #eee; padding-bottom: 0.5rem; }
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; margin-bottom: 2rem; }
+        
+        /* Cards */
+        .card { 
+            background: var(--bg-white); 
+            padding: 1.5rem; 
+            border-radius: 12px; 
+            box-shadow: 0 4px 6px rgba(4, 60, 188, 0.1); 
+            border-top: 4px solid var(--primary-blue);
+        }
+
+        /* Forms */
+        input, select { 
+            width: 100%; 
+            padding: 0.75rem; 
+            margin-bottom: 1rem; 
+            box-sizing: border-box; 
+            border: 1px solid #cbd5e1;
+            border-radius: 6px;
+            font-size: 1rem;
+        }
+        input:focus, select:focus {
+            outline: none;
+            border-color: var(--accent-cyan);
+            box-shadow: 0 0 0 3px rgba(20, 210, 250, 0.2);
+        }
+
+        /* Buttons */
+        button { 
+            padding: 0.75rem 1.5rem; 
+            background: var(--primary-blue); 
+            color: white; 
+            border: none; 
+            border-radius: 6px; 
+            cursor: pointer; 
+            width: 100%; 
+            font-weight: 600;
+            font-size: 1rem;
+            transition: all 0.2s;
+        }
+        button:hover { background: var(--blue-violet); transform: translateY(-1px); }
+        .btn-logout { background: #dc2626; width: auto; }
+        .btn-logout:hover { background: #b91c1c; }
+        .btn-accent { background: var(--accent-cyan); color: var(--primary-blue); }
+        .btn-accent:hover { background: #0ea5e9; color: white; }
+
+        /* Master Table */
+        .table-container { overflow-x: auto; }
+        table { width: 100%; border-collapse: collapse; font-size: 0.95rem; }
+        th { 
+            background-color: var(--primary-blue); 
+            color: white; 
+            text-align: left; 
+            padding: 1rem; 
+            font-weight: 600;
+        }
+        td { padding: 1rem; border-bottom: 1px solid #e2e8f0; }
+        tr:nth-child(even) { background-color: #f8fafc; }
+        tr:hover { background-color: #eff6ff; }
     </style>
 </head>
 <body>
     <div class="header">
-        <h1>Admin Dashboard</h1>
+        <h1>Regime Flyers Dashboard</h1>
         <form method="post" action="/logout">
-            <button style="background: #dc2626; width: auto;">Logout</button>
+            <button class="btn-logout">Logout</button>
         </form>
     </div>
 
+    <!-- FORM GRID -->
     <div class="grid">
-        <!-- Column 1: Properties & Meters -->
+        <!-- Column 1 -->
         <div>
             <div class="card" style="margin-bottom: 2rem;">
                 <h2>Add House</h2>
@@ -32,12 +109,6 @@
                     <input type="text" name="address" placeholder="Address" required>
                     <button type="submit">Add House</button>
                 </form>
-                <table>
-                    <tr><th>House #</th><th>Address</th></tr>
-                    {% for house in houses %}
-                    <tr><td>{{ house.house_number }}</td><td>{{ house.address.as_deref().unwrap_or("-") }}</td></tr>
-                    {% endfor %}
-                </table>
             </div>
 
             <div class="card">
@@ -50,21 +121,12 @@
                         {% endfor %}
                     </select>
                     <input type="text" name="meter_number" placeholder="Meter Serial Number" required>
-                    <button type="submit">Register Meter</button>
+                    <button type="submit" class="btn-accent">Register Meter</button>
                 </form>
-                <table>
-                    <tr><th>Meter Serial</th><th>Assigned Tenant</th></tr>
-                    {% for meter in meters %}
-                    <tr>
-                        <td>{{ meter.meter_number }}</td>
-                        <td>{{ meter.tenant_name.as_deref().unwrap_or("-") }}</td>
-                    </tr>
-                    {% endfor %}
-                </table>
             </div>
         </div>
 
-        <!-- Column 2: Floors & Tenants -->
+        <!-- Column 2 -->
         <div>
             <div class="card" style="margin-bottom: 2rem;">
                 <h2>Add Floor</h2>
@@ -92,20 +154,53 @@
                     </select>
                     <input type="text" name="full_name" placeholder="Full Name" required>
                     <input type="text" name="phone" placeholder="Phone Number" required>
-                    <button type="submit">Add Tenant</button>
+                    <button type="submit" class="btn-accent">Add Tenant</button>
                 </form>
-                <table>
-                    <tr><th>Tenant Name</th><th>Floor ID</th><th>Phone</th></tr>
-                    {% for tenant in tenants %}
-                    <tr>
-                        <td>{{ tenant.full_name }}</td>
-                        <td>{{ tenant.floor_id }}</td>
-                        <td>{{ tenant.phone.as_deref().unwrap_or("-") }}</td>
-                    </tr>
-                    {% endfor %}
-                </table>
             </div>
         </div>
+    </div>
+
+    <!-- MASTER TABLE -->
+    <div class="card table-container" style="margin-top: 2rem;">
+        <h2>Master Property & Utilities Overview</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>House #</th>
+                    <th>Address</th>
+                    <th>Floor</th>
+                    <th>Capacity</th>
+                    <th>Tenant Name</th>
+                    <th>Phone Number</th>
+                    <th>Water Meter</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for row in master_table %}
+                <tr>
+                    <td><strong>{{ row.house_number }}</strong></td>
+                    <td>{{ row.address.as_deref().unwrap_or("-") }}</td>
+                    <td>
+                        {% if let Some(f) = row.floor_no %}{{ f }}{% else %}-{% endif %}
+                    </td>
+                    <td>
+                        {% if let Some(c) = row.capacity %}{{ c }} pax{% else %}-{% endif %}
+                    </td>
+                    <td>
+                        {% if let Some(t) = row.tenant_name %}{{ t }}{% else %}<span style="color: #94a3b8; font-style: italic;">Vacant</span>{% endif %}
+                    </td>
+                    <td>{{ row.phone.as_deref().unwrap_or("-") }}</td>
+                    <td>
+                        {% if let Some(m) = row.meter_number %}
+                            <span style="background: var(--bg-light-blue); color: var(--primary-blue); padding: 0.25rem 0.5rem; border-radius: 4px; font-weight: bold;">{{ m }}</span>
+                        {% else %}
+                            -
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
     </div>
 </body>
 </html>

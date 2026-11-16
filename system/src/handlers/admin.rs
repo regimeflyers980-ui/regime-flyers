@@ -1,6 +1,6 @@
 use crate::auth::{require_admin, AuthUser};
 use crate::models::{
-    FloorForm, FloorOption, House, HouseForm, MeterForm, Tenant, TenantForm, WaterMeterView,
+    FloorForm, FloorOption, FullPropertyView, House, HouseForm, MeterForm, Tenant, TenantForm,
 };
 use askama::Template;
 use axum::{
@@ -17,7 +17,7 @@ pub struct DashboardTemplate {
     pub houses: Vec<House>,
     pub floor_options: Vec<FloorOption>,
     pub tenants: Vec<Tenant>,
-    pub meters: Vec<WaterMeterView>,
+    pub master_table: Vec<FullPropertyView>,
 }
 
 pub async fn dashboard(
@@ -40,15 +40,24 @@ pub async fn dashboard(
         "SELECT id, floor_id, full_name, phone FROM tenants ORDER BY full_name"
     ).fetch_all(&pool).await.map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)?;
 
-    // SQL JOIN solves the Askama UUID comparison issue perfectly
-    let meters: Vec<WaterMeterView> = sqlx::query_as(
-        "SELECT m.id, m.meter_number, t.full_name as tenant_name
-         FROM water_meters m
-         LEFT JOIN tenants t ON m.tenant_id = t.id
-         ORDER BY m.meter_number"
+    // THE MASTER QUERY: Joins everything from Houses down to Meters
+    let master_table: Vec<FullPropertyView> = sqlx::query_as(
+        "SELECT 
+            h.house_number, 
+            h.address, 
+            f.floor_no, 
+            f.capacity,
+            t.full_name as tenant_name, 
+            t.phone, 
+            m.meter_number
+         FROM houses h
+         LEFT JOIN floors f ON h.id = f.house_id
+         LEFT JOIN tenants t ON f.id = t.floor_id
+         LEFT JOIN water_meters m ON t.id = m.tenant_id
+         ORDER BY h.house_number, f.floor_no, t.full_name"
     ).fetch_all(&pool).await.map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)?;
 
-    let tpl = DashboardTemplate { houses, floor_options, tenants, meters };
+    let tpl = DashboardTemplate { houses, floor_options, tenants, master_table };
     Ok(Html(tpl.render().unwrap()))
 }
 
