@@ -55,20 +55,11 @@ pub struct TenantForm {
     pub phone: String,
 }
 
-// Used for the dropdown in the Admin Dashboard
 #[derive(FromRow, Serialize)]
 pub struct FloorOption {
     pub id: i32,
     pub house_number: String,
     pub floor_no: i32,
-}
-
-// Used to display the meter AND the tenant's name together
-#[derive(FromRow, Serialize)]
-pub struct WaterMeterView {
-    pub id: i32,
-    pub meter_number: String,
-    pub tenant_name: Option<String>,
 }
 
 #[derive(Deserialize)]
@@ -77,9 +68,24 @@ pub struct MeterForm {
     pub meter_number: String,
 }
 
-// Represents a single row in the Master table
+#[derive(FromRow, Serialize)]
+pub struct MeterOption {
+    pub id: i32,
+    pub meter_number: String,
+    pub tenant_name: Option<String>,
+}
+
+#[derive(Deserialize)]
+pub struct ReadingForm {
+    pub meter_id: i32,
+    pub previous_units: f64,
+    pub current_units: f64,
+}
+
 #[derive(FromRow, Serialize)]
 pub struct FullPropertyView {
+    pub tenant_id: Option<Uuid>,
+    pub user_id: Option<Uuid>,
     pub house_number: String,
     pub address: Option<String>,
     pub floor_no: Option<i32>,
@@ -87,4 +93,32 @@ pub struct FullPropertyView {
     pub tenant_name: Option<String>,
     pub phone: Option<String>,
     pub meter_number: Option<String>,
+    pub previous_units: Option<f64>,
+    pub current_units: Option<f64>,
+    pub units_used: Option<f64>,
+}
+
+#[derive(FromRow, Serialize)]
+pub struct PortalReading {
+    pub meter_number: String,
+    pub reading_date: DateTime<Utc>,
+    pub previous_units: f64,
+    pub current_units: f64,
+    pub units_used: f64,
+}
+
+#[derive(Serialize, Deserialize)]
+pub struct OcrResult {
+    pub raw_text: String,
+    pub detected_number: Option<f64>,
+    pub image_path: String,
+    pub meter_id: i32,
+}
+
+#[derive(Deserialize)]
+pub struct ConfirmOcrForm {
+    pub meter_id: i32,
+    pub current_units: f64,
+    pub image_path: String,
+    pub previous_units: f64,
 }

@@ -6,6 +6,7 @@ use argon2::{
 use axum::{
     extract::FromRequestParts,
     http::{request::Parts, StatusCode},
+    response::{IntoResponse, Redirect, Response},
 };
 use sqlx::PgPool;
 use tower_sessions::Session;
@@ -18,6 +19,29 @@ pub const SESSION_ROLE: &str = "role";
 pub struct AuthUser {
     pub id: Uuid,
     pub role: String,
+}
+
+// NEW: Unified Error type that handles both Redirects and StatusCodes
+pub enum AppError {
+    Redirect(Redirect),
+    Status(StatusCode),
+}
+
+impl IntoResponse for AppError {
+    fn into_response(self) -> Response {
+        match self {
+            AppError::Redirect(r) => r.into_response(),
+            AppError::Status(s) => s.into_response(),
+        }
+    }
+}
+
+impl From<Redirect> for AppError {
+    fn from(r: Redirect) -> Self { AppError::Redirect(r) }
+}
+
+impl From<StatusCode> for AppError {
+    fn from(s: StatusCode) -> Self { AppError::Status(s) }
 }
 
 pub fn hash_password(password: &str) -> String {
@@ -67,23 +91,27 @@ impl<S> FromRequestParts<S> for AuthUser
 where
     S: Send + Sync,
 {
-    type Rejection = StatusCode;
+    type Rejection = Redirect;
 
     async fn from_request_parts(parts: &mut Parts, _state: &S) -> Result<Self, Self::Rejection> {
         let session = Session::from_request_parts(parts, _state)
             .await
-            .map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)?;
+            .map_err(|_| Redirect::to("/login"))?;
 
-        let user_id: Option<Uuid> = session.get(SESSION_USER_ID).await.map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)?;
-        let role: Option<String> = session.get(SESSION_ROLE).await.map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)?;
+        let user_id: Option<Uuid> = session.get(SESSION_USER_ID).await.map_err(|_| Redirect::to("/login"))?;
+        let role: Option<String> = session.get(SESSION_ROLE).await.map_err(|_| Redirect::to("/login"))?;
 
         match (user_id, role) {
             (Some(id), Some(role)) => Ok(AuthUser { id, role }),
-            _ => Err(StatusCode::UNAUTHORIZED),
+            _ => Err(Redirect::to("/login")),
         }
     }
 }
 
-pub fn require_admin(user: &AuthUser) -> Result<(), StatusCode> {
-    if user.role == "ADMIN" { Ok(()) } else { Err(StatusCode::FORBIDDEN) }
+pub fn require_admin(user: &AuthUser) -> Result<(), AppError> {
+    if user.role == "ADMIN" { 
+        Ok(()) 
+    } else { 
+        Err(Redirect::to("/portal").into()) 
+    }
 }

@@ -30,7 +30,7 @@ async fn main() -> anyhow::Result<()> {
         .with_expiry(Expiry::OnInactivity(time::Duration::days(7)));
 
     let app = Router::new()
-        .route("/", get(|| async { "Regime Flyers System is Online!" }))
+        .route("/", get(handlers::public::index))
         .route("/login", get(handlers::auth::login_form).post(handlers::auth::login))
         .route("/logout", post(handlers::auth::logout))
         // Admin Routes
@@ -39,11 +39,21 @@ async fn main() -> anyhow::Result<()> {
         .route("/admin/floors", post(handlers::admin::add_floor))
         .route("/admin/tenants", post(handlers::admin::add_tenant))
         .route("/admin/meters", post(handlers::admin::add_meter))
+        .route("/admin/readings", post(handlers::admin::add_reading))
+        .route("/admin/tenants/:id/delete", post(handlers::admin::delete_tenant))
+        .route("/admin/tenants/:id/create-account", post(handlers::admin::create_tenant_account))
+        // Client Portal
+        .route("/portal", get(handlers::portal::dashboard))
+  // Add these inside Router::new():
+        .route("/admin/ocr", post(handlers::ocr::scan_meter))
+        .route("/admin/ocr/confirm", post(handlers::admin::confirm_ocr_reading))
+        // Add this to serve the uploaded images and any CSS:
+        .nest_service("/static", tower_http::services::ServeDir::new("static"))
         .layer(session_layer)
         .layer(TraceLayer::new_for_http())
         .with_state(pool);
 
-    let addr_str = std::env::var("BIND_ADDR").unwrap_or_else(|_| "127.0.0.1:3000".into());
+    let addr_str = std::env::var("BIND_ADDR").unwrap_or_else(|_| "0.0.0.0:3000".into());
     let addr: SocketAddr = addr_str.parse()?;
     tracing::info!("🚀 Server listening on {}", addr);
     

@@ -3,111 +3,93 @@
 <head>
     <title>Admin Dashboard - Regime Flyers</title>
     <style>
-        /* Regime Flyers Design System */
         :root {
-            --primary-blue: #043cbc;
-            --accent-cyan: #14d2fa;
-            --bg-light-blue: #d0ecfc;
-            --bg-white: #ffffff;
-            --text-dark: #1f2937;
-            --blue-violet: #5b21b6; 
-            --accent-green: #10b981;
+            --primary-blue: #043cbc; --accent-cyan: #14d2fa; --bg-light-blue: #d0ecfc;
+            --bg-white: #ffffff; --text-dark: #1f2937; --blue-violet: #5b21b6; 
         }
-
-        body { 
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
-            background-color: var(--bg-light-blue); 
-            color: var(--text-dark);
-            margin: 0; 
-            padding: 2rem; 
-        }
-
-        /* Typography */
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: var(--bg-light-blue); color: var(--text-dark); margin: 0; padding: 2rem; }
         h1, h2, h3 { color: var(--primary-blue); margin-top: 0; }
         h1 { font-size: 2rem; font-weight: 700; }
-        h2 { font-size: 1.25rem; border-bottom: 2px solid var(--bg-light-blue); padding-bottom: 0.5rem; margin-bottom: 1rem;}
-
-        /* Layout */
-        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; }
-        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; margin-bottom: 2rem; }
+        h2 { font-size: 1.1rem; border-bottom: 2px solid var(--bg-light-blue); padding-bottom: 0.5rem; margin-bottom: 1rem; text-transform: uppercase; letter-spacing: 0.5px; }
         
-        /* Cards */
-        .card { 
-            background: var(--bg-white); 
-            padding: 1.5rem; 
-            border-radius: 12px; 
-            box-shadow: 0 4px 6px rgba(4, 60, 188, 0.1); 
-            border-top: 4px solid var(--primary-blue);
-        }
-
-        /* Forms */
-        input, select { 
-            width: 100%; 
-            padding: 0.75rem; 
-            margin-bottom: 1rem; 
-            box-sizing: border-box; 
-            border: 1px solid #cbd5e1;
-            border-radius: 6px;
-            font-size: 1rem;
-        }
-        input:focus, select:focus {
-            outline: none;
-            border-color: var(--accent-cyan);
-            box-shadow: 0 0 0 3px rgba(20, 210, 250, 0.2);
-        }
-
-        /* Buttons */
-        button { 
-            padding: 0.75rem 1.5rem; 
-            background: var(--primary-blue); 
-            color: white; 
-            border: none; 
-            border-radius: 6px; 
-            cursor: pointer; 
-            width: 100%; 
-            font-weight: 600;
-            font-size: 1rem;
-            transition: all 0.2s;
-        }
+        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; }
+        
+        /* 3-Column Layout for Forms */
+        .grid-3-col { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.5rem; margin-bottom: 2rem; align-items: start; }
+        
+        .card { background: var(--bg-white); padding: 1.25rem; border-radius: 12px; box-shadow: 0 4px 6px rgba(4, 60, 188, 0.1); border-top: 4px solid var(--primary-blue); margin-bottom: 1.5rem; }
+        
+        input, select { width: 100%; padding: 0.6rem; margin-bottom: 0.75rem; box-sizing: border-box; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 0.9rem; }
+        input:focus, select:focus { outline: none; border-color: var(--accent-cyan); box-shadow: 0 0 0 3px rgba(20, 210, 250, 0.2); }
+        
+        button { padding: 0.6rem 1rem; background: var(--primary-blue); color: white; border: none; border-radius: 6px; cursor: pointer; width: 100%; font-weight: 600; font-size: 0.9rem; transition: all 0.2s; }
         button:hover { background: var(--blue-violet); transform: translateY(-1px); }
         .btn-logout { background: #dc2626; width: auto; }
         .btn-logout:hover { background: #b91c1c; }
         .btn-accent { background: var(--accent-cyan); color: var(--primary-blue); }
         .btn-accent:hover { background: #0ea5e9; color: white; }
-
+        
         /* Master Table */
         .table-container { overflow-x: auto; }
         table { width: 100%; border-collapse: collapse; font-size: 0.95rem; }
-        th { 
-            background-color: var(--primary-blue); 
-            color: white; 
-            text-align: left; 
-            padding: 1rem; 
-            font-weight: 600;
-        }
-        td { padding: 1rem; border-bottom: 1px solid #e2e8f0; }
+        th { background-color: var(--primary-blue); color: white; text-align: left; padding: 1rem; font-weight: 600; }
+        td { padding: 1rem; border-bottom: 1px solid #e2e8f0; vertical-align: top; }
         tr:nth-child(even) { background-color: #f8fafc; }
         tr:hover { background-color: #eff6ff; }
+
+        /* Responsive */
+        @media (max-width: 1024px) { .grid-3-col { grid-template-columns: 1fr 1fr; } }
+        @media (max-width: 768px) { .grid-3-col { grid-template-columns: 1fr; } }
     </style>
 </head>
 <body>
     <div class="header">
         <h1>Regime Flyers Dashboard</h1>
-        <form method="post" action="/logout">
-            <button class="btn-logout">Logout</button>
-        </form>
+        <form method="post" action="/logout"><button class="btn-logout">Logout</button></form>
     </div>
 
-    <!-- FORM GRID -->
-    <div class="grid">
-        <!-- Column 1 -->
+    <div class="grid-3-col">
+        <!-- Column 1: Properties -->
         <div>
-            <div class="card" style="margin-bottom: 2rem;">
+            <div class="card">
                 <h2>Add House</h2>
                 <form method="post" action="/admin/houses">
                     <input type="text" name="house_number" placeholder="House Number (e.g. A1)" required>
                     <input type="text" name="address" placeholder="Address" required>
                     <button type="submit">Add House</button>
+                </form>
+            </div>
+
+            <div class="card">
+                <h2>Add Floor</h2>
+                <form method="post" action="/admin/floors">
+                    <select name="house_id" required>
+                        <option value="">Select House...</option>
+                        {% for house in houses %}
+                        <option value="{{ house.id }}">{{ house.house_number }}</option>
+                        {% endfor %}
+                    </select>
+                    <input type="number" name="floor_no" placeholder="Floor Number" required>
+                    <input type="number" name="capacity" placeholder="Tenant Capacity" required>
+                    <button type="submit">Add Floor</button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Column 2: Tenants -->
+        <div>
+            <div class="card">
+                <h2>Register Tenant</h2>
+                <form method="post" action="/admin/tenants">
+                    <select name="floor_id" required>
+                        <option value="">Select Floor...</option>
+                        {% for floor in floor_options %}
+                        <option value="{{ floor.id }}">House {{ floor.house_number }} - Floor {{ floor.floor_no }}</option>
+                        {% endfor %}
+                    </select>
+                    <input type="text" name="full_name" placeholder="Full Name" required>
+                    <input type="text" name="phone" placeholder="Phone Number" required>
+                    <button type="submit" class="btn-accent">Add Tenant</button>
                 </form>
             </div>
 
@@ -126,73 +108,97 @@
             </div>
         </div>
 
-        <!-- Column 2 -->
+        <!-- Column 3: Readings -->
         <div>
-            <div class="card" style="margin-bottom: 2rem;">
-                <h2>Add Floor</h2>
-                <form method="post" action="/admin/floors">
-                    <select name="house_id" required>
-                        <option value="">Select House...</option>
-                        {% for house in houses %}
-                        <option value="{{ house.id }}">{{ house.house_number }}</option>
+            <div class="card">
+                <h2>Manual Reading</h2>
+                <form method="post" action="/admin/readings">
+                    <select name="meter_id" required>
+                        <option value="">Select Meter...</option>
+                        {% for m in meter_options %}
+                        <option value="{{ m.id }}">{{ m.meter_number }} ({{ m.tenant_name.as_deref().unwrap_or("Unassigned") }})</option>
                         {% endfor %}
                     </select>
-                    <input type="number" name="floor_no" placeholder="Floor Number" required>
-                    <input type="number" name="capacity" placeholder="Tenant Capacity" required>
-                    <button type="submit">Add Floor</button>
+                    <input type="number" step="0.01" name="previous_units" placeholder="Previous Units" required>
+                    <input type="number" step="0.01" name="current_units" placeholder="Current Units" required>
+                    <button type="submit">Save Reading</button>
                 </form>
             </div>
 
             <div class="card">
-                <h2>Register Tenant</h2>
-                <form method="post" action="/admin/tenants">
-                    <select name="floor_id" required>
-                        <option value="">Select Floor...</option>
-                        {% for floor in floor_options %}
-                        <option value="{{ floor.id }}">House {{ floor.house_number }} - Floor {{ floor.floor_no }}</option>
+                <h2>OCR Camera Scan</h2>
+                <form id="ocrForm">
+                    <select name="meter_id" id="ocrMeterId" required>
+                        <option value="">Select Meter...</option>
+                        {% for m in meter_options %}
+                        <option value="{{ m.id }}">{{ m.meter_number }}</option>
                         {% endfor %}
                     </select>
-                    <input type="text" name="full_name" placeholder="Full Name" required>
-                    <input type="text" name="phone" placeholder="Phone Number" required>
-                    <button type="submit" class="btn-accent">Add Tenant</button>
+                    <input type="file" id="meterImage" accept="image/*" capture="environment" required style="padding: 0.4rem;">
+                    <button type="button" onclick="scanImage()" class="btn-accent">Scan Image</button>
                 </form>
+                
+                <div id="scanResult" style="display:none; margin-top: 1rem; padding: 1rem; background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 6px;">
+                    <p style="margin-top: 0; font-size: 0.9rem;">Detected: <strong id="detectedNum"></strong></p>
+                    <img id="scannedImg" style="max-width: 100%; height: auto; margin-bottom: 1rem; border-radius: 4px;">
+                    <form method="post" action="/admin/ocr/confirm">
+                        <input type="hidden" name="meter_id" id="confirmMeterId">
+                        <input type="hidden" name="image_path" id="confirmImagePath">
+                        <input type="number" step="0.01" name="current_units" id="confirmUnits" required>
+                        <input type="number" step="0.01" name="previous_units" placeholder="Previous Units" required>
+                        <button type="submit" style="background: #16a34a;">Confirm & Save</button>
+                    </form>
+                </div>
             </div>
         </div>
     </div>
 
     <!-- MASTER TABLE -->
-    <div class="card table-container" style="margin-top: 2rem;">
+    <div class="card table-container">
         <h2>Master Property & Utilities Overview</h2>
         <table>
             <thead>
                 <tr>
                     <th>House #</th>
-                    <th>Address</th>
                     <th>Floor</th>
-                    <th>Capacity</th>
-                    <th>Tenant Name</th>
-                    <th>Phone Number</th>
-                    <th>Water Meter</th>
+                    <th>Tenant Info</th>
+                    <th>Meter</th>
+                    <th>Previous</th>
+                    <th>Current</th>
+                    <th>Used</th>
+                    <th>Actions</th>
                 </tr>
             </thead>
             <tbody>
                 {% for row in master_table %}
                 <tr>
-                    <td><strong>{{ row.house_number }}</strong></td>
-                    <td>{{ row.address.as_deref().unwrap_or("-") }}</td>
+                    <td><strong>{{ row.house_number }}</strong><br><small style="color:#64748b">{{ row.address.as_deref().unwrap_or("-") }}</small></td>
+                    <td>{% if let Some(f) = row.floor_no %}{{ f }}{% else %}-{% endif %}</td>
                     <td>
-                        {% if let Some(f) = row.floor_no %}{{ f }}{% else %}-{% endif %}
+                        {% if let Some(t) = row.tenant_name %}
+                            <strong>{{ t }}</strong><br><small>{{ row.phone.as_deref().unwrap_or("-") }}</small>
+                        {% else %}
+                            <span style="color: #94a3b8; font-style: italic;">Vacant</span>
+                        {% endif %}
                     </td>
+                    <td>{{ row.meter_number.as_deref().unwrap_or("-") }}</td>
+                    <td>{% if let Some(u) = row.previous_units %}{{ u }}{% else %}-{% endif %}</td>
+                    <td>{% if let Some(u) = row.current_units %}{{ u }}{% else %}-{% endif %}</td>
+                    <td><strong style="color: var(--primary-blue);">{% if let Some(u) = row.units_used %}{{ u }}{% else %}-{% endif %}</strong></td>
                     <td>
-                        {% if let Some(c) = row.capacity %}{{ c }} pax{% else %}-{% endif %}
-                    </td>
-                    <td>
-                        {% if let Some(t) = row.tenant_name %}{{ t }}{% else %}<span style="color: #94a3b8; font-style: italic;">Vacant</span>{% endif %}
-                    </td>
-                    <td>{{ row.phone.as_deref().unwrap_or("-") }}</td>
-                    <td>
-                        {% if let Some(m) = row.meter_number %}
-                            <span style="background: var(--bg-light-blue); color: var(--primary-blue); padding: 0.25rem 0.5rem; border-radius: 4px; font-weight: bold;">{{ m }}</span>
+                        {% if let Some(tenant_id) = row.tenant_id %}
+                            <div style="display: flex; gap: 0.5rem;">
+                                {% if row.user_id.is_none() %}
+                                <form method="post" action="/admin/tenants/{{ tenant_id }}/create-account">
+                                    <button type="submit" class="btn-accent" style="padding: 0.25rem 0.5rem; width: auto; font-size: 0.8rem;">Login</button>
+                                </form>
+                                {% else %}
+                                <span style="font-size: 0.8rem; color: green; font-weight: bold; padding-top: 0.25rem;">Active</span>
+                                {% endif %}
+                                <form method="post" action="/admin/tenants/{{ tenant_id }}/delete" onsubmit="return confirm('Are you sure you want to remove this tenant?');">
+                                    <button type="submit" style="background: #dc2626; padding: 0.25rem 0.5rem; width: auto; font-size: 0.8rem;">Delete</button>
+                                </form>
+                            </div>
                         {% else %}
                             -
                         {% endif %}
@@ -202,5 +208,37 @@
             </tbody>
         </table>
     </div>
+
+    <script>
+        async function scanImage() {
+            const fileInput = document.getElementById('meterImage');
+            const meterId = document.getElementById('ocrMeterId').value;
+            if (!fileInput.files[0] || !meterId) return alert("Select a meter and an image");
+
+            const formData = new FormData();
+            formData.append('meter_image', fileInput.files[0]);
+
+            try {
+                const response = await fetch('/admin/ocr', {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                if (!response.ok) throw new Error(`Server status: ${response.status}`);
+
+                const data = await response.json();
+                
+                document.getElementById('scanResult').style.display = 'block';
+                document.getElementById('detectedNum').innerText = data.detected_number || "Not found";
+                document.getElementById('confirmUnits').value = data.detected_number || "";
+                document.getElementById('confirmMeterId').value = meterId;
+                document.getElementById('confirmImagePath').value = data.image_path;
+                document.getElementById('scannedImg').src = "/" + data.image_path;
+            } catch (e) {
+                alert("Scan failed. Check the terminal.");
+                console.error(e);
+            }
+        }
+    </script>
 </body>
 </html>
