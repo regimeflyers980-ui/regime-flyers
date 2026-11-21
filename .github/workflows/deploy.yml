@@ -7,7 +7,6 @@ on:
 
 jobs:
   build-and-deploy:
-    # Use a standard, reliable GitHub-hosted runner (cloud)
     runs-on: ubuntu-latest
     
     steps:
@@ -17,9 +16,7 @@ jobs:
       - name: Connect to Tailscale
         uses: tailscale/github-action@v3
         with:
-          oauth-client-id: ${{ secrets.TS_OAUTH_CLIENT_ID }} # Optional if using OAuth
-          authkey: ${{ secrets.TS_AUTHKEY }} # Use the auth key you created
-          tags: tag:ci # Optional: tag for the ephemeral runner node
+          authkey: ${{ secrets.TS_AUTHKEY }}
 
       - name: Install Rust Toolchain
         uses: dtolnay/rust-toolchain@stable
@@ -33,25 +30,30 @@ jobs:
         working-directory: ./system
         run: cargo build --release --target x86_64-unknown-linux-musl
 
-      # Now, use the Tailscale IP to reach your private VM
       - name: Copy Binary and Templates to Alpine VM
         uses: appleboy/scp-action@master
         with:
-          host: ${{ secrets.TAILSCALE_VM_IP }} # Use the Tailscale IP
+          host: ${{ secrets.TAILSCALE_VM_IP }}
           username: ${{ secrets.ALPINE_USER }}
           key: ${{ secrets.ALPINE_SSH_KEY }}
+          # REMOVED strip_components so folder structure is preserved
           source: "system/target/x86_64-unknown-linux-musl/release/regime_flyers,system/templates/*"
           target: "/home/regimeflyers/deploy/"
-          strip_components: 5
 
       - name: Restart OpenRC Service
         uses: appleboy/ssh-action@master
         with:
-          host: ${{ secrets.TAILSCALE_VM_IP }} # Use the Tailscale IP
+          host: ${{ secrets.TAILSCALE_VM_IP }}
           username: ${{ secrets.ALPINE_USER }}
           key: ${{ secrets.ALPINE_SSH_KEY }}
           script: |
-            sudo chmod +x /home/regimeflyers/deploy/regime_flyers
-            sudo cp /home/regimeflyers/deploy/regime_flyers /usr/local/bin/regime_flyers
-            sudo cp -r /home/regimeflyers/deploy/templates /usr/local/bin/templates
+            # 1. Move the binary
+            sudo chmod +x /home/regimeflyers/deploy/system/target/x86_64-unknown-linux-musl/release/regime_flyers
+            sudo cp /home/regimeflyers/deploy/system/target/x86_64-unknown-linux-musl/release/regime_flyers /usr/local/bin/regime_flyers
+            
+            # 2. Move the templates
+            sudo mkdir -p /usr/local/bin/templates
+            sudo cp -r /home/regimeflyers/deploy/system/templates/* /usr/local/bin/templates/
+            
+            # 3. Restart the service
             sudo rc-service regime-flyers restart
