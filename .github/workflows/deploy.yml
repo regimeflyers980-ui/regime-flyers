@@ -18,6 +18,13 @@ jobs:
         with:
           authkey: ${{ secrets.TS_AUTHKEY }}
 
+      # ADD THIS DEBUG STEP:
+      - name: Debug - Ping VM over Tailscale
+        run: |
+          echo "Pinging ${{ secrets.TAILSCALE_VM_IP }}..."
+          tailscale ping ${{ secrets.TAILSCALE_VM_IP }}
+          ping -c 2 ${{ secrets.TAILSCALE_VM_IP }}
+
       - name: Install Rust Toolchain
         uses: dtolnay/rust-toolchain@stable
         with:
