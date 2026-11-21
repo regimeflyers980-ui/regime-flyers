@@ -3,8 +3,7 @@ name: Build and Deploy Rust System
 on:
   push:
     branches: [ main ]
-    paths:
-      - 'system/**' # Only run when Rust code changes
+  workflow_dispatch: # Allows you to manually trigger it from GitHub
 
 jobs:
   build-and-deploy:
