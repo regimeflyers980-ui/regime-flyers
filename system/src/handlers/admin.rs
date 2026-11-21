@@ -201,3 +201,53 @@ pub async fn confirm_ocr_reading(
     
     Ok(Redirect::to("/admin"))
 }
+
+// NEW: Send Notification to Client
+pub async fn notify_tenant(
+    user: AuthUser, 
+    State(pool): State<PgPool>, 
+    Path(tenant_id): Path<Uuid>,
+) -> Result<Redirect, AppError> {
+    require_admin(&user)?;
+
+    // Fetch tenant and their latest reading
+    let data: Option<(String, Option<String>, Option<String>, Option<f64>, Option<f64>, Option<f64>)> = sqlx::query_as(
+        "SELECT 
+            t.full_name, 
+            t.phone, 
+            m.meter_number,
+            r.previous_units::float8, 
+            r.current_units::float8, 
+            r.units_used::float8
+         FROM tenants t
+         LEFT JOIN water_meters m ON t.id = m.tenant_id
+         LEFT JOIN LATERAL (
+             SELECT previous_units, current_units, units_used
+             FROM meter_readings
+             WHERE meter_id = m.id
+             ORDER BY reading_date DESC LIMIT 1
+         ) r ON true
+         WHERE t.id = $1"
+    )
+    .bind(tenant_id)
+    .fetch_optional(&pool)
+    .await
+    .map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)?;
+
+    if let Some((name, phone, meter, prev, curr, used)) = data {
+        if let (Some(m), Some(p), Some(c), Some(u)) = (meter, prev, curr, used) {
+            // SIMULATED NOTIFICATION: In production, use `lettre` to send an email here.
+            tracing::info!("==================================================");
+            tracing::info!("📧 SENDING NOTIFICATION TO CLIENT");
+            tracing::info!("To: {} (Phone: {})", name, phone.unwrap_or("N/A".into()));
+            tracing::info!("Meter: {}", m);
+            tracing::info!("Previous: {} | Current: {} | Units Used: {}", p, c, u);
+            tracing::info!("Message: Hello {}, your water consumption for meter {} is {} units.", name, m, u);
+            tracing::info!("==================================================");
+        } else {
+            tracing::warn!("Cannot notify {}: No meter or reading data available.", name);
+        }
+    }
+
+    Ok(Redirect::to("/admin"))
+}

@@ -46,6 +46,7 @@ async fn main() -> anyhow::Result<()> {
         .route("/portal", get(handlers::portal::dashboard))
   // Add these inside Router::new():
         .route("/admin/ocr", post(handlers::ocr::scan_meter))
+        .route("/admin/tenants/:id/notify", post(handlers::admin::notify_tenant))
         .route("/admin/ocr/confirm", post(handlers::admin::confirm_ocr_reading))
         // Add this to serve the uploaded images and any CSS:
         .nest_service("/static", tower_http::services::ServeDir::new("static"))

@@ -195,6 +195,11 @@
                                 {% else %}
                                 <span style="font-size: 0.8rem; color: green; font-weight: bold; padding-top: 0.25rem;">Active</span>
                                 {% endif %}
+
+                                <!-- NEW NOTIFY BUTTON -->
+                                <form method="post" action="/admin/tenants/{{ tenant_id }}/notify">
+                                    <button type="submit" style="background: #f59e0b; padding: 0.25rem 0.5rem; width: auto; font-size: 0.8rem; color: white;">Notify</button>
+                                </form>
                                 <form method="post" action="/admin/tenants/{{ tenant_id }}/delete" onsubmit="return confirm('Are you sure you want to remove this tenant?');">
                                     <button type="submit" style="background: #dc2626; padding: 0.25rem 0.5rem; width: auto; font-size: 0.8rem;">Delete</button>
                                 </form>
