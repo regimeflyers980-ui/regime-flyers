@@ -122,3 +122,15 @@ pub struct ConfirmOcrForm {
     pub image_path: String,
     pub previous_units: f64,
 }
+
+#[derive(FromRow, Serialize)]
+pub struct Setting {
+    pub key: String,
+    pub value: String,
+}
+
+#[derive(Deserialize)]
+pub struct Settingsform {
+    pub water_rate: string,
+}
+

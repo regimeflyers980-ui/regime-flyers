@@ -1,7 +1,7 @@
 use crate::auth::{hash_password, require_admin, AppError, AuthUser};
 use crate::models::{
     FloorForm, FloorOption, FullPropertyView, House, HouseForm, MeterForm, MeterOption,
-    ReadingForm, Tenant, TenantForm, ConfirmOcrForm
+    ReadingForm, Tenant, TenantForm, ConfirmOcrForm, Setting, SettingsForm
 };
 use askama::Template;
 use axum::{
@@ -21,6 +21,7 @@ pub struct DashboardTemplate {
     pub tenants: Vec<Tenant>,
     pub meter_options: Vec<MeterOption>,
     pub master_table: Vec<FullPropertyView>,
+    pub water_rate: String,
 }
 
 pub async fn dashboard(
@@ -89,8 +90,26 @@ pub async fn dashboard(
         StatusCode::INTERNAL_SERVER_ERROR
     })?;
 
-    let tpl = DashboardTemplate { houses, floor_options, tenants, meter_options, master_table };
+    let wate_rate:String = sqlx::query_scalar("SELECT value FROM settings WHERE key = 'water_rate'")
+        .fetch_one(&pool)
+        .await
+        .unwrap_or_else(|_| "1.50".to_string());
+
+
+    let tpl = DashboardTemplate { houses, floor_options, tenants, meter_options, master_table, water_rate };
     Ok(Html(tpl.render().unwrap()))
+}
+
+pub async fn update_settings(
+    user: AuthUser, State(pool): State<PgPool>, Form(form): Form<SettingsForm>,
+) -> Result<Redirect, AppError> {
+    require_admin(&user)?;
+    
+    sqlx::query("UPDATE settings SET value = $1 WHERE key = 'water_rate'")
+        .bind(&form.water_rate)
+        .execute(&pool).await.map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)?;
+        
+    Ok(Redirect::to("/admin"))
 }
 
 pub async fn add_house(
