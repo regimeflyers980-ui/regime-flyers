@@ -123,6 +123,8 @@ pub struct ConfirmOcrForm {
     pub previous_units: f64,
 }
 
+// --- NEW SETTINGS STRUCTS ---
+#[allow(dead_code)]
 #[derive(FromRow, Serialize)]
 pub struct Setting {
     pub key: String,
@@ -130,7 +132,6 @@ pub struct Setting {
 }
 
 #[derive(Deserialize)]
-pub struct Settingsform {
-    pub water_rate: string,
+pub struct SettingsForm {
+    pub water_rate: String,
 }
-
