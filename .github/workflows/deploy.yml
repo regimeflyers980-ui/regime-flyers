@@ -18,12 +18,10 @@ jobs:
         with:
           authkey: ${{ secrets.TS_AUTHKEY }}
 
-      - name: Check VM Connectivity
+      - name: Check SSH Connectivity
         run: |
-          echo "Pinging VM..."
-          ping -c 4 ${{ secrets.TAILSCALE_VM_IP }} || exit 1
-          echo "Checking SSH Port..."
-          nc -zv -w 5 ${{ secrets.TAILSCALE_VM_IP }} 22 || exit 1
+          echo "Checking SSH port on ${{ secrets.TAILSCALE_VM_IP }}..."
+          timeout 10 nc -zv ${{ secrets.TAILSCALE_VM_IP }} 22 || (echo "SSH Connection Failed! Is the VM awake and SSH running?" && exit 1)
 
       - name: Install Rust Toolchain
         uses: dtolnay/rust-toolchain@stable
@@ -45,6 +43,8 @@ jobs:
           key: ${{ secrets.ALPINE_SSH_KEY }}
           source: "system/target/x86_64-unknown-linux-musl/release/regime_flyers,system/templates/*"
           target: "/home/regimeflyers/deploy/"
+          timeout: 30s
+          command_timeout: 5m
 
       - name: Restart OpenRC Service
         uses: appleboy/ssh-action@master
