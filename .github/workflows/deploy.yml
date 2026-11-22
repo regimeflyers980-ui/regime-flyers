@@ -18,6 +18,13 @@ jobs:
         with:
           authkey: ${{ secrets.TS_AUTHKEY }}
 
+      - name: Check VM Connectivity
+        run: |
+          echo "Pinging VM..."
+          ping -c 4 ${{ secrets.TAILSCALE_VM_IP }} || exit 1
+          echo "Checking SSH Port..."
+          nc -zv -w 5 ${{ secrets.TAILSCALE_VM_IP }} 22 || exit 1
+
       - name: Install Rust Toolchain
         uses: dtolnay/rust-toolchain@stable
         with:
