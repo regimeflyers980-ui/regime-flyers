@@ -20,7 +20,7 @@ jobs:
 
       - name: Check SSH Connectivity
         run: |
-          # This strips any hidden spaces or newlines from the secret
+          # Strip any hidden newlines from the secret
           IP=$(echo "${{ secrets.TAILSCALE_VM_IP }}" | tr -d '[:space:]')
           echo "Checking SSH port on $IP..."
           timeout 10 nc -zv $IP 22 || (echo "SSH Connection Failed! Is the VM awake and SSH running?" && exit 1)
@@ -45,8 +45,8 @@ jobs:
           key: ${{ secrets.ALPINE_SSH_KEY }}
           source: "system/target/x86_64-unknown-linux-musl/release/regime_flyers,system/templates/*"
           target: "/home/regimeflyers/deploy/"
-          timeout: 30s
-          command_timeout: 5m
+          timeout: 15s        # <--- FORCES FAST FAIL
+          command_timeout: 2m # <--- FORCES FAST FAIL
 
       - name: Restart OpenRC Service
         uses: appleboy/ssh-action@master
@@ -54,6 +54,7 @@ jobs:
           host: ${{ secrets.TAILSCALE_VM_IP }}
           username: ${{ secrets.ALPINE_USER }}
           key: ${{ secrets.ALPINE_SSH_KEY }}
+          timeout: 15s
           script: |
             sudo chmod +x /home/regimeflyers/deploy/system/target/x86_64-unknown-linux-musl/release/regime_flyers
             sudo cp /home/regimeflyers/deploy/system/target/x86_64-unknown-linux-musl/release/regime_flyers /usr/local/bin/regime_flyers
