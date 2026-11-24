@@ -18,48 +18,45 @@ jobs:
         with:
           authkey: ${{ secrets.TS_AUTHKEY }}
 
-      - name: Check SSH Connectivity
-        run: |
-          # Strip any hidden newlines from the secret
-          IP=$(echo "${{ secrets.TAILSCALE_VM_IP }}" | tr -d '[:space:]')
-          echo "Checking SSH port on $IP..."
-          timeout 10 nc -zv $IP 22 || (echo "SSH Connection Failed! Is the VM awake and SSH running?" && exit 1)
-
       - name: Install Rust Toolchain
         uses: dtolnay/rust-toolchain@stable
         with:
           targets: x86_64-unknown-linux-musl
 
-      - name: Install musl tools
-        run: sudo apt-get update && sudo apt-get install -y musl-tools
+      - name: Install musl tools and rsync
+        run: sudo apt-get update && sudo apt-get install -y musl-tools rsync
 
       - name: Build Static Binary
         working-directory: ./system
         run: cargo build --release --target x86_64-unknown-linux-musl
 
-      - name: Copy Binary and Templates to Alpine VM
-        uses: appleboy/scp-action@master
-        with:
-          host: ${{ secrets.TAILSCALE_VM_IP }}
-          username: ${{ secrets.ALPINE_USER }}
-          key: ${{ secrets.ALPINE_SSH_KEY }}
-          source: "system/target/x86_64-unknown-linux-musl/release/regime_flyers,system/templates/*"
-          target: "/home/regimeflyers/deploy/"
-          timeout: 15s        # <--- FORCES FAST FAIL
-          command_timeout: 2m # <--- FORCES FAST FAIL
+      # NATIVE DEPLOYMENT (NO BUGGY EXTERNAL ACTIONS)
+      - name: Deploy via Native SSH & Rsync
+        run: |
+          # 1. Setup SSH Key securely
+          mkdir -p ~/.ssh
+          echo "${{ secrets.ALPINE_SSH_KEY }}" > ~/.ssh/id_ed25519
+          chmod 600 ~/.ssh/id_ed25519
+
+          # 2. Clean the IP secret of any hidden newlines
+          IP=$(echo "${{ secrets.TAILSCALE_VM_IP }}" | tr -d '[:space:]')
+
+          # 3. Add VM to known_hosts to prevent handshake prompts (Fixes the EOF error)
+          ssh-keyscan -H $IP >> ~/.ssh/known_hosts 2>/dev/null
+
+          # 4. Use Rsync to copy files (Fails fast if network drops)
+          timeout 60 rsync -avz -e "ssh -o StrictHostKeyChecking=no -o ConnectTimeout=10" \
+            ./system/target/x86_64-unknown-linux-musl/release/regime_flyers \
+            ./system/templates \
+            ${{ secrets.ALPINE_USER }}@$IP:/home/regimeflyers/deploy/
 
       - name: Restart OpenRC Service
-        uses: appleboy/ssh-action@master
-        with:
-          host: ${{ secrets.TAILSCALE_VM_IP }}
-          username: ${{ secrets.ALPINE_USER }}
-          key: ${{ secrets.ALPINE_SSH_KEY }}
-          timeout: 15s
-          script: |
-            sudo chmod +x /home/regimeflyers/deploy/system/target/x86_64-unknown-linux-musl/release/regime_flyers
-            sudo cp /home/regimeflyers/deploy/system/target/x86_64-unknown-linux-musl/release/regime_flyers /usr/local/bin/regime_flyers
-            
+        run: |
+          IP=$(echo "${{ secrets.TAILSCALE_VM_IP }}" | tr -d '[:space:]')
+          timeout 60 ssh -o StrictHostKeyChecking=no -o ConnectTimeout=10 ${{ secrets.ALPINE_USER }}@$IP << 'EOF'
+            sudo chmod +x /home/regimeflyers/deploy/regime_flyers
+            sudo cp /home/regimeflyers/deploy/regime_flyers /usr/local/bin/regime_flyers
             sudo mkdir -p /usr/local/bin/templates
-            sudo cp -r /home/regimeflyers/deploy/system/templates/* /usr/local/bin/templates/
-            
+            sudo cp -r /home/regimeflyers/deploy/templates/* /usr/local/bin/templates/
             sudo rc-service regime-flyers restart
+          EOF
